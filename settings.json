@@ -1,0 +1,362 @@
+[
+    {
+        "id": "asst_qeIGyD6t3kprdrUXzgfxCkJF",
+        "created_at": 1730905044,
+        "description": "Manages the overall food recommendation process and coordinates between agents",
+        "instructions": "agency_manifesto.md\n\n# Agent Role\n\nThe Recommendation Manager is responsible for coordinating the food recommendation process and managing communication between different agents. It serves as the primary point of contact for users and orchestrates the flow of information between the Food Preferences and Restaurant Recommendation agents.\n\n# Goals\n\n1. Efficiently manage user requests for food recommendations\n2. Coordinate communication between different agents\n3. Ensure a smooth and logical flow of the recommendation process\n4. Maintain context throughout the conversation\n5. Provide clear and helpful responses to users\n\n# Process Workflow\n\n1. Receive initial user request for food recommendations\n2. Analyze the request type and required next steps\n3. Coordinate with Food Preferences agent to gather or update user preferences\n4. Direct the Restaurant Recommendation agent to search for suitable options\n5. Present recommendations to the user in a clear and organized manner\n6. Handle any follow-up questions or requests\n7. Maintain the conversation flow and context throughout the interaction ",
+        "metadata": {},
+        "model": "gpt-4o-2024-08-06",
+        "name": "Recommendation Manager",
+        "object": "assistant",
+        "tools": [
+            {
+                "function": {
+                    "name": "ManageRequest",
+                    "description": "Tool for managing food recommendation requests and coordinating with other agents.",
+                    "parameters": {
+                        "properties": {
+                            "request_type": {
+                                "description": "Type of request (initial, preferences, recommendation)",
+                                "title": "Request Type",
+                                "type": "string"
+                            },
+                            "user_input": {
+                                "description": "User's input or request details",
+                                "title": "User Input",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "request_type",
+                            "user_input"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "SendMessage",
+                    "description": "Use this tool to facilitate direct, synchronous communication between specialized agents within your agency. When you send a message using this tool, you receive a response exclusively from the designated recipient agent. To continue the dialogue, invoke this tool again with the desired recipient agent and your follow-up message. Remember, communication here is synchronous; the recipient agent won't perform any tasks post-response. You are responsible for relaying the recipient agent's responses back to the user, as the user does not have direct access to these replies. Keep engaging with the tool for continuous interaction until the task is fully resolved. Do not send more than 1 message at a time.",
+                    "parameters": {
+                        "$defs": {
+                            "recipient": {
+                                "enum": [
+                                    "Food Preferences",
+                                    "Restaurant Recommendation"
+                                ],
+                                "title": "recipient",
+                                "type": "string"
+                            }
+                        },
+                        "properties": {
+                            "my_primary_instructions": {
+                                "description": "Please repeat your primary instructions step-by-step, including both completed and the following next steps that you need to perform. For multi-step, complex tasks, first break them down into smaller steps yourself. Then, issue each step individually to the recipient agent via the message parameter. Each identified step should be sent in separate message. Keep in mind, that the recipient agent does not have access to these instructions. You must include recipient agent-specific instructions in the message or additional_instructions parameters.",
+                                "title": "My Primary Instructions",
+                                "type": "string"
+                            },
+                            "recipient": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/$defs/recipient"
+                                    }
+                                ],
+                                "description": "Food Preferences: Handles user food preferences and dietary restrictions\nRestaurant Recommendation: Provides restaurant recommendations based on user preferences\n"
+                            },
+                            "message": {
+                                "description": "Specify the task required for the recipient agent to complete. Focus on clarifying what the task entails, rather than providing exact instructions.",
+                                "title": "Message",
+                                "type": "string"
+                            },
+                            "message_files": {
+                                "anyOf": [
+                                    {
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "A list of file ids to be sent as attachments to this message. Only use this if you have the file id that starts with 'file-'.",
+                                "examples": [
+                                    "file-1234",
+                                    "file-5678"
+                                ],
+                                "title": "Message Files"
+                            },
+                            "additional_instructions": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "Additional context or instructions for the recipient agent about the task. For example, additional information provided by the user or other agents.",
+                                "title": "Additional Instructions"
+                            }
+                        },
+                        "required": [
+                            "message",
+                            "my_primary_instructions",
+                            "recipient"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            }
+        ],
+        "response_format": "auto",
+        "temperature": 0.7,
+        "tool_resources": {
+            "code_interpreter": null,
+            "file_search": null
+        },
+        "top_p": 1.0
+    },
+    {
+        "id": "asst_BSSJeYWFS9Lfc5bwKLDt0GcZ",
+        "created_at": 1730905045,
+        "description": "Handles user food preferences and dietary restrictions",
+        "instructions": "agency_manifesto.md\n\n# Agent Role\n\nThe Food Preferences agent is responsible for gathering, storing, and managing user food preferences and dietary restrictions. It ensures that all recommendations align with the user's specific needs and preferences.\n\n# Goals\n\n1. Collect comprehensive food preferences from users\n2. Store and maintain accurate preference data\n3. Consider dietary restrictions and special requirements\n4. Provide clear preference information to other agents\n5. Update preferences based on user feedback\n\n# Process Workflow\n\n1. Engage with users to gather food preferences\n2. Ask specific questions about:\n   - Preferred cuisines\n   - Dietary restrictions\n   - Price range\n   - Special requirements\n3. Save and organize preference information\n4. Retrieve preferences when needed by other agents\n5. Update preferences based on new information\n6. Validate preference consistency\n7. Format preference data for use in recommendations ",
+        "metadata": {},
+        "model": "gpt-4o-2024-08-06",
+        "name": "Food Preferences",
+        "object": "assistant",
+        "tools": [
+            {
+                "function": {
+                    "name": "SavePreferences",
+                    "description": "Tool for saving user food preferences and dietary restrictions",
+                    "parameters": {
+                        "properties": {
+                            "cuisine_type": {
+                                "description": "Preferred cuisine type(s)",
+                                "title": "Cuisine Type",
+                                "type": "string"
+                            },
+                            "dietary_restrictions": {
+                                "description": "Any dietary restrictions or preferences",
+                                "title": "Dietary Restrictions",
+                                "type": "string"
+                            },
+                            "price_range": {
+                                "description": "Preferred price range",
+                                "title": "Price Range",
+                                "type": "string"
+                            },
+                            "additional_preferences": {
+                                "default": "",
+                                "description": "Any additional preferences or notes",
+                                "title": "Additional Preferences",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "cuisine_type",
+                            "dietary_restrictions",
+                            "price_range"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "GetPreferences",
+                    "description": "Tool for retrieving saved user food preferences",
+                    "parameters": {
+                        "properties": {},
+                        "type": "object",
+                        "required": []
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "SendMessage",
+                    "description": "Use this tool to facilitate direct, synchronous communication between specialized agents within your agency. When you send a message using this tool, you receive a response exclusively from the designated recipient agent. To continue the dialogue, invoke this tool again with the desired recipient agent and your follow-up message. Remember, communication here is synchronous; the recipient agent won't perform any tasks post-response. You are responsible for relaying the recipient agent's responses back to the user, as the user does not have direct access to these replies. Keep engaging with the tool for continuous interaction until the task is fully resolved. Do not send more than 1 message at a time.",
+                    "parameters": {
+                        "$defs": {
+                            "recipient": {
+                                "const": "Restaurant Recommendation",
+                                "enum": [
+                                    "Restaurant Recommendation"
+                                ],
+                                "title": "recipient",
+                                "type": "string"
+                            }
+                        },
+                        "properties": {
+                            "my_primary_instructions": {
+                                "description": "Please repeat your primary instructions step-by-step, including both completed and the following next steps that you need to perform. For multi-step, complex tasks, first break them down into smaller steps yourself. Then, issue each step individually to the recipient agent via the message parameter. Each identified step should be sent in separate message. Keep in mind, that the recipient agent does not have access to these instructions. You must include recipient agent-specific instructions in the message or additional_instructions parameters.",
+                                "title": "My Primary Instructions",
+                                "type": "string"
+                            },
+                            "recipient": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/$defs/recipient"
+                                    }
+                                ],
+                                "description": "Restaurant Recommendation: Provides restaurant recommendations based on user preferences\n"
+                            },
+                            "message": {
+                                "description": "Specify the task required for the recipient agent to complete. Focus on clarifying what the task entails, rather than providing exact instructions.",
+                                "title": "Message",
+                                "type": "string"
+                            },
+                            "message_files": {
+                                "anyOf": [
+                                    {
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "A list of file ids to be sent as attachments to this message. Only use this if you have the file id that starts with 'file-'.",
+                                "examples": [
+                                    "file-1234",
+                                    "file-5678"
+                                ],
+                                "title": "Message Files"
+                            },
+                            "additional_instructions": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "Additional context or instructions for the recipient agent about the task. For example, additional information provided by the user or other agents.",
+                                "title": "Additional Instructions"
+                            }
+                        },
+                        "required": [
+                            "message",
+                            "my_primary_instructions",
+                            "recipient"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            }
+        ],
+        "response_format": "auto",
+        "temperature": 0.7,
+        "tool_resources": {
+            "code_interpreter": null,
+            "file_search": null
+        },
+        "top_p": 1.0
+    },
+    {
+        "id": "asst_pusEljlB4g3wPvV4n5SIBUdk",
+        "created_at": 1730905046,
+        "description": "Provides restaurant recommendations based on user preferences",
+        "instructions": "agency_manifesto.md\n\n# Agent Role\n\nThe Restaurant Recommendation agent is responsible for finding and suggesting restaurants that match user preferences and requirements. It analyzes preference data and searches for suitable dining options.\n\n# Goals\n\n1. Provide accurate restaurant recommendations based on user preferences\n2. Consider all dietary restrictions and requirements\n3. Offer diverse dining options within specified parameters\n4. Save and track recommendations for future reference\n5. Ensure recommendations are practical and accessible\n\n# Process Workflow\n\n1. Receive user preferences from the Food Preferences agent\n2. Search for restaurants matching the criteria:\n   - Location\n   - Cuisine type\n   - Price range\n   - Dietary restrictions\n3. Filter and rank restaurant options\n4. Save promising recommendations\n5. Present detailed information about recommended restaurants\n6. Provide additional details when requested\n7. Update recommendations based on user feedback ",
+        "metadata": {},
+        "model": "gpt-4o-2024-08-06",
+        "name": "Restaurant Recommendation",
+        "object": "assistant",
+        "tools": [
+            {
+                "function": {
+                    "name": "SearchRestaurants",
+                    "description": "Tool for searching restaurants based on user preferences",
+                    "parameters": {
+                        "properties": {
+                            "location": {
+                                "description": "Location for restaurant search",
+                                "title": "Location",
+                                "type": "string"
+                            },
+                            "cuisine_type": {
+                                "description": "Type of cuisine to search for",
+                                "title": "Cuisine Type",
+                                "type": "string"
+                            },
+                            "price_range": {
+                                "description": "Desired price range",
+                                "title": "Price Range",
+                                "type": "string"
+                            },
+                            "dietary_restrictions": {
+                                "default": "",
+                                "description": "Any dietary restrictions to consider",
+                                "title": "Dietary Restrictions",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "cuisine_type",
+                            "location",
+                            "price_range"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "SaveRecommendation",
+                    "description": "Tool for saving restaurant recommendations",
+                    "parameters": {
+                        "properties": {
+                            "restaurant_name": {
+                                "description": "Name of the recommended restaurant",
+                                "title": "Restaurant Name",
+                                "type": "string"
+                            },
+                            "details": {
+                                "description": "Restaurant details including address, cuisine, price range, etc.",
+                                "title": "Details",
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "details",
+                            "restaurant_name"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            }
+        ],
+        "response_format": "auto",
+        "temperature": 0.7,
+        "tool_resources": {
+            "code_interpreter": null,
+            "file_search": null
+        },
+        "top_p": 1.0
+    }
+]
